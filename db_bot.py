@@ -1,6 +1,7 @@
 import json
 import os
 import sqlite3
+from openai import OpenAI
 
 # Load configuration file
 with open("config.json") as configFile:
@@ -21,5 +22,16 @@ with (
     dbCursor.executescript(dbInitFile.read())
     dbCursor.executescript(dbInitDataFile.read())
 
+# Open AI Client
+def getChatResponse(prompt: str):
+    openAiClient = OpenAI(api_key=config["openaiKey"])
 
-print("End")
+    response = openAiClient.chat.completions.create(
+        model=config["openaiModel"],
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content
+
+# prompt = input("Enter prompt:\n")
+prompt = "Write the numbers 1-10, separated by commas"
+print(getChatResponse(prompt))
