@@ -9,10 +9,10 @@ insert into product (product_id, description, product_type_id) values
 (4, "Chips", 2),
 (5, "Bagel", null);
 
-insert into vending_machine (vending_machine_id, longitude, latitude) values 
-(1, -111.649315, 40.251842),
-(2, -111.649178, 40.248305),
-(3, -111.647095, 40.248600);
+insert into vending_machine (vending_machine_id, location_name, longitude, latitude) values 
+(1, "Building 1", -111.649315, 40.251842),
+(2, "Building 2", -111.649178, 40.248305),
+(3, "Break room", -111.647095, 40.248600);
 
 insert into vending_machine_product (vending_machine_id, product_id, quantity, price) values 
 (1, 1, 3, 1.25),

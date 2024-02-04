@@ -12,6 +12,7 @@ create table if not exists product (
 
 create table if not exists vending_machine (
     vending_machine_id int primary key,
+    location_name varchar(20),
     longitude decimal(9,6) not null,
     latitude decimal(8,6) not null
 );
