@@ -73,7 +73,7 @@ questions = [
     "Which vending machines have Coke?", # 1/Building 1, 2/Building 2
     "Which vending machines need to be restocked?", # 1/Building 1, 2/Break room
     "Which of John's starred vending machines have Drinks?", # 1/Building 1, 2/Building 2
-    "Which of John's preferred vending machines have Lemonade?" # 2/Building 2
+    "Which of John's preferred vending machines have Lemonade?", # 2/Building 2
     "Which of Mary's starred vending machines have which of her starred products in stock?", # 3 (Bagel)
     "My coordinates are 40.249828, -111.647139. What vending machine is closest to me?", # 3
     "Who has the greatest quantity of their starred products available in their starred vending machines?",
@@ -94,6 +94,7 @@ for strategy in strategies:
         print(answerQuestion(prompt, log))
         results.append(log)
         print()
+        time.sleep(config["rateLimit"])
     print()
 
 with open(f"response_{time()}.json", "w") as outFile:
