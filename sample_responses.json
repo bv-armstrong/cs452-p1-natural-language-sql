@@ -1,0 +1,167 @@
+[
+    {
+        "strategy": "zero-shot-given-tables",
+        "question": "Which vending machines have Coke?",
+        "sql": "\nSELECT v.location_name\nFROM vending_machine v\nJOIN vending_machine_product vp ON v.vending_machine_id = vp.vending_machine_id\nJOIN product p ON vp.product_id = p.product_id\nJOIN product_type pt ON p.product_type_id = pt.product_type_id\nWHERE pt.display_value = 'Coke';\n",
+        "queryResponse": "[]",
+        "friendlyresponse": "There are no vending machines that have Coke.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-tables",
+        "question": "Which vending machines need to be restocked?",
+        "sql": "\nSELECT vending_machine_id, location_name\nFROM vending_machine\nWHERE vending_machine_id IN (\n    SELECT vending_machine_id\n    FROM vending_machine_product\n    WHERE quantity <= 0\n);\n",
+        "queryResponse": "[(1, 'Building 1'), (3, 'Break room')]",
+        "friendlyresponse": "The vending machines that need to be restocked are located in Building 1 and the Break room.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-tables",
+        "question": "Which of John's starred vending machines have Drinks?",
+        "sql": "\nSELECT vending_machine.vending_machine_id, vending_machine.location_name\nFROM vending_machine\nJOIN user_vending_machine_starred ON vending_machine.vending_machine_id = user_vending_machine_starred.vending_machine_id\nJOIN vending_machine_product ON vending_machine.vending_machine_id = vending_machine_product.vending_machine_id\nJOIN product ON vending_machine_product.product_id = product.product_id\nJOIN user ON user_vending_machine_starred.user_id = user.user_id\nWHERE user.name = 'John' AND product.display_value = 'Drinks';\n",
+        "success": false,
+        "gptResponse": "```sql\nSELECT vending_machine.vending_machine_id, vending_machine.location_name\nFROM vending_machine\nJOIN user_vending_machine_starred ON vending_machine.vending_machine_id = user_vending_machine_starred.vending_machine_id\nJOIN vending_machine_product ON vending_machine.vending_machine_id = vending_machine_product.vending_machine_id\nJOIN product ON vending_machine_product.product_id = product.product_id\nJOIN user ON user_vending_machine_starred.user_id = user.user_id\nWHERE user.name = 'John' AND product.display_value = 'Drinks';\n```"
+    },
+    {
+        "strategy": "zero-shot-given-tables",
+        "question": "Which of John's preferred vending machines have Lemonade?Which of Mary's starred vending machines have which of her starred products in stock?",
+        "sql": "\nSELECT v.location_name\nFROM vending_machine v\nJOIN user_vending_machine_starred uvs ON uvs.vending_machine_id = v.vending_machine_id\nJOIN user u ON u.user_id = uvs.user_id\nJOIN vending_machine_product vmp ON vmp.vending_machine_id = v.vending_machine_id\nJOIN product p ON p.product_id = vmp.product_id\nWHERE u.name = 'John'\nAND p.description = 'Lemonade';\n",
+        "queryResponse": "[('Building 2',)]",
+        "friendlyresponse": "John's preferred vending machine in Building 2 has Lemonade.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-tables",
+        "question": "My coordinates are 40.249828, -111.647139. What vending machine is closest to me?",
+        "sql": "\nSELECT vending_machine_id, location_name, longitude, latitude,\n    (ABS(longitude - -111.647139) + ABS(latitude - 40.249828)) AS distance\nFROM vending_machine\nORDER BY distance ASC\nLIMIT 1;\n",
+        "queryResponse": "[(3, 'Break room', -111.647095, 40.2486, 0.0012720000000001619)]",
+        "friendlyresponse": "The closest vending machine to your coordinates (40.249828, -111.647139) is located in the Break room.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-tables",
+        "question": "Who has the greatest quantity of their starred products available in their starred vending machines?",
+        "sql": "\nSELECT u.name, SUM(vp.quantity) AS total_quantity\nFROM user AS u\nINNER JOIN user_vending_machine_starred AS uvs ON u.user_id = uvs.user_id\nINNER JOIN vending_machine_product AS vp ON uvs.vending_machine_id = vp.vending_machine_id\nINNER JOIN user_product_starred AS ups ON u.user_id = ups.user_id\nWHERE vp.product_id = ups.product_id\nGROUP BY u.name\nORDER BY total_quantity DESC\nLIMIT 1;\n",
+        "queryResponse": "[('John', 15)]",
+        "friendlyresponse": "John has the greatest quantity of their starred products available in their starred vending machines, with a total quantity of 15.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-tables",
+        "question": "Which machines have only one product type in stock?",
+        "sql": "\nSELECT vending_machine_id\nFROM vending_machine_product\nGROUP BY vending_machine_id\nHAVING COUNT(DISTINCT product_id) = 1;\n",
+        "queryResponse": "[]",
+        "friendlyresponse": "There are no machines that have only one product type in stock.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-sample-data",
+        "question": "Which vending machines have Coke?",
+        "sql": "\nSELECT vending_machine.vending_machine_id, vending_machine.location_name \nFROM vending_machine\nJOIN vending_machine_product ON vending_machine.vending_machine_id = vending_machine_product.vending_machine_id\nJOIN product ON vending_machine_product.product_id = product.product_id\nWHERE product.description = \"Coke\";\n",
+        "queryResponse": "[(1, 'Building 1'), (2, 'Building 2')]",
+        "friendlyresponse": "The vending machines that have Coke are located in Building 1 and Building 2.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-sample-data",
+        "question": "Which vending machines need to be restocked?",
+        "sql": "\nSELECT v.vending_machine_id, v.location_name\nFROM vending_machine v\nLEFT JOIN vending_machine_product vp ON v.vending_machine_id = vp.vending_machine_id\nWHERE vp.quantity = 0\nGROUP BY v.vending_machine_id, v.location_name\nHAVING COUNT(vp.product_id) > 0;\n",
+        "queryResponse": "[(1, 'Building 1'), (3, 'Break room')]",
+        "friendlyresponse": "The vending machines that need to be restocked are:\n- Vending machine ID: 1\n  Location Name: Building 1\n\n- Vending machine ID: 3\n  Location Name: Break room",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-sample-data",
+        "question": "Which of John's starred vending machines have Drinks?",
+        "sql": "\nSELECT uvms.vending_machine_id, vm.location_name\nFROM user_vending_machine_starred AS uvms\nJOIN vending_machine AS vm ON uvms.vending_machine_id = vm.vending_machine_id\nJOIN vending_machine_product AS vmp ON uvms.vending_machine_id = vmp.vending_machine_id\nJOIN product AS p ON vmp.product_id = p.product_id\nJOIN product_type AS pt ON p.product_type_id = pt.product_type_id\nJOIN user AS u ON uvms.user_id = u.user_id\nWHERE u.name = \"John\" AND pt.display_value = \"Drink\";\n",
+        "queryResponse": "[(1, 'Building 1'), (1, 'Building 1'), (2, 'Building 2'), (2, 'Building 2'), (2, 'Building 2')]",
+        "friendlyresponse": "John's starred vending machines with drinks are located in Building 1 and Building 2.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-sample-data",
+        "question": "Which of John's preferred vending machines have Lemonade?Which of Mary's starred vending machines have which of her starred products in stock?",
+        "sql": "\nSELECT vm.location_name\nFROM user u\nJOIN user_vending_machine_starred uvs ON u.user_id = uvs.user_id\nJOIN vending_machine vm ON uvs.vending_machine_id = vm.vending_machine_id\nJOIN vending_machine_product vmp ON vm.vending_machine_id = vmp.vending_machine_id\nJOIN product p ON vmp.product_id = p.product_id AND p.description = \"Lemonade\"\nWHERE u.name = \"John\";\n",
+        "queryResponse": "[('Building 2',)]",
+        "friendlyresponse": "John's preferred vending machine, located in Building 2, has Lemonade available. Regarding Mary's starred vending machines and products, we do not have data available at the moment to provide you with specific information.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-sample-data",
+        "question": "My coordinates are 40.249828, -111.647139. What vending machine is closest to me?",
+        "sql": "\nSELECT vending_machine_id, location_name, longitude, latitude, \n    ABS(latitude - 40.249828) + ABS(longitude - (-111.647139)) AS distance \nFROM vending_machine \nORDER BY distance ASC \nLIMIT 1;\n",
+        "queryResponse": "[(3, 'Break room', -111.647095, 40.2486, 0.0012720000000001619)]",
+        "friendlyresponse": "The closest vending machine to your location with coordinates 40.249828, -111.647139 is located in the break room.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-sample-data",
+        "question": "Who has the greatest quantity of their starred products available in their starred vending machines?",
+        "sql": "\nSELECT u.name\nFROM user AS u\nJOIN user_product_starred AS ups ON u.user_id = ups.user_id\nJOIN user_vending_machine_starred AS uvms ON u.user_id = uvms.user_id\nJOIN vending_machine_product AS vmp ON uvms.vending_machine_id = vmp.vending_machine_id\nWHERE vmp.product_id = ups.product_id\nGROUP BY u.name\nORDER BY SUM(vmp.quantity) DESC\nLIMIT 1;\n",
+        "queryResponse": "[('John',)]",
+        "friendlyresponse": "John has the greatest quantity of their starred products available in their starred vending machines.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-sample-data",
+        "question": "Which machines have only one product type in stock?",
+        "sql": "\nSELECT v.location_name AS machine_location\nFROM vending_machine v\nJOIN vending_machine_product vp ON v.vending_machine_id = vp.vending_machine_id\nJOIN product p ON vp.product_id = p.product_id\nGROUP BY v.vending_machine_id\nHAVING COUNT(DISTINCT p.product_type_id) = 1;\n",
+        "queryResponse": "[('Building 2',)]",
+        "friendlyresponse": "Building 2 has machines that have only one product type in stock.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-tables-and-data",
+        "question": "Which vending machines have Coke?",
+        "sql": "\nSELECT vending_machine.vending_machine_id, vending_machine.location_name\nFROM vending_machine\nJOIN vending_machine_product ON vending_machine.vending_machine_id = vending_machine_product.vending_machine_id\nJOIN product ON vending_machine_product.product_id = product.product_id\nWHERE product.description = \"Coke\"\n",
+        "queryResponse": "[(1, 'Building 1'), (2, 'Building 2')]",
+        "friendlyresponse": "The vending machines that have Coke are located in Building 1 and Building 2.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-tables-and-data",
+        "question": "Which vending machines need to be restocked?",
+        "sql": "\nSELECT vm.vending_machine_id, vm.location_name\nFROM vending_machine vm\nJOIN vending_machine_product vmp ON vm.vending_machine_id = vmp.vending_machine_id\nWHERE vmp.quantity = 0;\n",
+        "queryResponse": "[(1, 'Building 1'), (3, 'Break room')]",
+        "friendlyresponse": "Vending machines with ID 1 located in Building 1 and ID 3 in the Break room need to be restocked.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-tables-and-data",
+        "question": "Which of John's starred vending machines have Drinks?",
+        "sql": "\nSELECT vending_machine_id\nFROM user_vending_machine_starred\nWHERE user_id = 1 AND vending_machine_id IN (\n    SELECT vending_machine_id\n    FROM vending_machine_product\n    INNER JOIN product_type ON vending_machine_product.product_id = product_type.product_type_id\n    WHERE product_type.display_value = \"Drink\"\n)\n",
+        "queryResponse": "[(1,), (2,)]",
+        "friendlyresponse": "John has two starred vending machines that have drinks. The vending machine IDs are 1 and 2.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-tables-and-data",
+        "question": "Which of John's preferred vending machines have Lemonade?Which of Mary's starred vending machines have which of her starred products in stock?",
+        "sql": "\nSELECT v.location_name, p.description\nFROM user_vending_machine_starred uvs\nJOIN vending_machine v ON uvs.vending_machine_id = v.vending_machine_id\nJOIN vending_machine_product vmp ON v.vending_machine_id = vmp.vending_machine_id\nJOIN product p ON vmp.product_id = p.product_id\nWHERE uvs.user_id = 1 and p.description = \"Lemonade\";\n\nSELECT v.location_name, p.description\nFROM user_vending_machine_starred uvs\nJOIN vending_machine v ON uvs.vending_machine_id = v.vending_machine_id\nJOIN vending_machine_product vmp ON v.vending_machine_id = vmp.vending_machine_id\nJOIN product p ON vmp.product_id = p.product_id\nWHERE uvs.user_id = 2 and p.product_id IN (\n    SELECT product_id\n    FROM user_product_starred\n    WHERE user_id = 2\n);\n",
+        "success": false,
+        "gptResponse": "```\nSELECT v.location_name, p.description\nFROM user_vending_machine_starred uvs\nJOIN vending_machine v ON uvs.vending_machine_id = v.vending_machine_id\nJOIN vending_machine_product vmp ON v.vending_machine_id = vmp.vending_machine_id\nJOIN product p ON vmp.product_id = p.product_id\nWHERE uvs.user_id = 1 and p.description = \"Lemonade\";\n\nSELECT v.location_name, p.description\nFROM user_vending_machine_starred uvs\nJOIN vending_machine v ON uvs.vending_machine_id = v.vending_machine_id\nJOIN vending_machine_product vmp ON v.vending_machine_id = vmp.vending_machine_id\nJOIN product p ON vmp.product_id = p.product_id\nWHERE uvs.user_id = 2 and p.product_id IN (\n    SELECT product_id\n    FROM user_product_starred\n    WHERE user_id = 2\n);\n```"
+    },
+    {
+        "strategy": "zero-shot-given-tables-and-data",
+        "question": "My coordinates are 40.249828, -111.647139. What vending machine is closest to me?",
+        "sql": "\nSELECT vending_machine_id, location_name, longitude, latitude,\n(SQRT((longitude - -111.647139) * (longitude - -111.647139) + (latitude - 40.249828) * (latitude - 40.249828))) AS distance\nFROM vending_machine\nORDER BY distance\nLIMIT 1;\n",
+        "queryResponse": "[(3, 'Break room', -111.647095, 40.2486, 0.0012287880207726013)]",
+        "friendlyresponse": "The closest vending machine to your location is located in the break room.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-tables-and-data",
+        "question": "Who has the greatest quantity of their starred products available in their starred vending machines?",
+        "sql": "\nSELECT user.name, SUM(vending_machine_product.quantity) AS total_quantity\nFROM user\nJOIN user_product_starred ON user.user_id = user_product_starred.user_id\nJOIN product ON user_product_starred.product_id = product.product_id\nJOIN vending_machine_product ON product.product_id = vending_machine_product.product_id\nJOIN vending_machine ON vending_machine_product.vending_machine_id = vending_machine.vending_machine_id\nJOIN user_vending_machine_starred ON vending_machine.vending_machine_id = user_vending_machine_starred.vending_machine_id\nWHERE user_product_starred.user_id = user_vending_machine_starred.user_id\nGROUP BY user.name\nORDER BY total_quantity DESC\nLIMIT 1;\n",
+        "queryResponse": "[('John', 15)]",
+        "friendlyresponse": "John has the greatest quantity of their starred products available in their starred vending machines with a total quantity of 15.",
+        "success": true
+    },
+    {
+        "strategy": "zero-shot-given-tables-and-data",
+        "question": "Which machines have only one product type in stock?",
+        "sql": "\nSELECT DISTINCT vending_machine_id, location_name\nFROM vending_machine\nJOIN vending_machine_product ON vending_machine.vending_machine_id = vending_machine_product.vending_machine_id\nJOIN product ON vending_machine_product.product_id = product.product_id\nJOIN (SELECT vending_machine_id, COUNT(DISTINCT product_type_id) as product_count\n      FROM vending_machine_product \n      JOIN product ON vending_machine_product.product_id = product.product_id\n      GROUP BY vending_machine_id) AS temp ON vending_machine.vending_machine_id = temp.vending_machine_id\nWHERE product_count = 1;\n",
+        "success": false,
+        "gptResponse": "```sql\nSELECT DISTINCT vending_machine_id, location_name\nFROM vending_machine\nJOIN vending_machine_product ON vending_machine.vending_machine_id = vending_machine_product.vending_machine_id\nJOIN product ON vending_machine_product.product_id = product.product_id\nJOIN (SELECT vending_machine_id, COUNT(DISTINCT product_type_id) as product_count\n      FROM vending_machine_product \n      JOIN product ON vending_machine_product.product_id = product.product_id\n      GROUP BY vending_machine_id) AS temp ON vending_machine.vending_machine_id = temp.vending_machine_id\nWHERE product_count = 1;\n```"
+    }
+]

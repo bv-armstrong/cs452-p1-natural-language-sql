@@ -1,0 +1,6 @@
+{
+    "dbName": "vending_machine_db.sqlite",
+    "openaiKey": "OPEN AI API KEY HERE",
+    "openaiModel": "gpt-3.5-turbo",
+    "rateLimit": 15
+}
