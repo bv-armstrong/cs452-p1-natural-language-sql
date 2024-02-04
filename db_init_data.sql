@@ -24,7 +24,7 @@ insert into vending_machine_product (vending_machine_id, product_id, quantity, p
 (2, 3, 2, 1.50),
 (3, 3, 0, 1.00),
 (3, 4, 1, 0.75),
-(3, 4, 6, 1.50);
+(3, 5, 6, 1.50);
 
 insert into user (user_id, name) values 
 (1, "John"),
